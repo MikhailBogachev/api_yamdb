@@ -1,3 +1,13 @@
 from django.db import models
 
-# Create your models here.
+
+class Category(models.Model):
+    """Категории (типы) произведений"""
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название категории',
+        help_text='Выбрать категорию')
+    slug = models.SlugField(
+        unique=True,
+        max_length=50)
+    description = models.TextField()
