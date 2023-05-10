@@ -11,3 +11,26 @@ class Category(models.Model):
         unique=True,
         max_length=50)
     description = models.TextField()
+
+
+class Comment(models.Model):
+    """Комментарии к ревью"""
+    review = models.ForeignKey(
+        Rewiew,
+        on_delete=models.CASCADE,
+        related_name='coments'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='coments'
+    )
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата добавления',
+        auto_now_add=True,
+        db_index=True
+    )
+
+    def __str__(self):
+        return self.text
