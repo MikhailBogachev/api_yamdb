@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
 from rest_framework.pagination import LimitOffsetPagination
-from reviews.models import Category, Comment
+from reviews.models import Category, Review
 from .serializers import CategorySerializer, CommentSerializer
 from .permissions import AdminOrAuthorOrReadOnly
 from django.shortcuts import get_object_or_404

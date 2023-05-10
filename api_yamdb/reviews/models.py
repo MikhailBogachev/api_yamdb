@@ -14,7 +14,7 @@ class Category(models.Model):
 
 
 class Comment(models.Model):
-    """Комментарии к ревью"""
+    """Комментарии к отзывам"""
     review = models.ForeignKey(
         Rewiew,
         on_delete=models.CASCADE,
