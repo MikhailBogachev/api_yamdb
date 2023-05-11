@@ -18,6 +18,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     permission_classes = [
         AdminOrAuthorOrReadOnly
     ]
+    pagination_class = LimitOffsetPagination
 
     def get_review(self):
         return get_object_or_404(Review, pk=self.kwargs.get('review_id'))
