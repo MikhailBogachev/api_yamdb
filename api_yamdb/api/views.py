@@ -1,9 +1,9 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions
 from rest_framework.pagination import LimitOffsetPagination
-from reviews.models import Category, Review
-from .serializers import CategorySerializer, CommentSerializer
+from reviews.models import Category, Review, Genre
+from .serializers import CategorySerializer, CommentSerializer, GenreSerializer
 from .permissions import AdminOrAuthorOrReadOnly
-from django.shortcuts import get_object_or_404
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -28,3 +28,10 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self.get_review())
+
+        
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = [permissions.IsAdminUser]
+    pagination_class = LimitOffsetPagination

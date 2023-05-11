@@ -34,3 +34,17 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.text
+
+
+class Genre(models.Model):
+    """Категории жанров"""
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Жанр',
+        help_text='Выбрать жанр')
+    slug = models.SlugField(
+        unique=True,
+        max_length=50,
+        verbose_name='Slug жанра'
+    )
+    description = models.TextField()
