@@ -2,10 +2,12 @@ from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, filters
 from rest_framework.pagination import LimitOffsetPagination
-from reviews.models import Category, Review, Genre
+from reviews.models import Category, Review, Genre, Title
 from .serializers import CategorySerializer, CommentSerializer, GenreSerializer
+from .serializers import TitleSerializer
 from .permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly
 from .mixins import GetPostDeleteViewSet
+from .filters import TitleFilter
 
 
 class CategoryViewSet(GetPostDeleteViewSet):
@@ -40,5 +42,16 @@ class GenreViewSet(GetPostDeleteViewSet):
     serializer_class = GenreSerializer
     permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
+    filter_backends = (DjangoFilterBackend,  filters.SearchFilter)
     filterset_fields = ('name', 'slug')
+    search_fields = ('name',)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    permission_classes = [AdminOrReadOnly]
+    pagination_class = LimitOffsetPagination
+    filter_backends = (DjangoFilterBackend,  filters.SearchFilter)
+    filterset_class = TitleFilter
     search_fields = ('name',)
