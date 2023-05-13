@@ -1,4 +1,5 @@
 from django.db import models
+from .validators import get_max_year_for_title, slug_validator
 
 
 class Category(models.Model):
@@ -11,9 +12,17 @@ class Category(models.Model):
     slug = models.SlugField(
         unique=True,
         max_length=50,
-        verbose_name='Slug категории',
+        validators=slug_validator,
+        verbose_name='Slug категории'
     )
-    description = models.TextField()
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Категория произведения'
+        verbose_name_plural = 'Категории произведения'
+
+    def __str__(self):
+        return self.name
 
 
 class Comment(models.Model):
@@ -44,10 +53,61 @@ class Genre(models.Model):
     name = models.CharField(
         max_length=256,
         verbose_name='Жанр',
-        help_text='Выбрать жанр')
+        help_text='Выбрать жанр'
+    )
     slug = models.SlugField(
         unique=True,
         max_length=50,
+        validators=slug_validator,
         verbose_name='Slug жанра'
     )
-    description = models.TextField()
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Категория жанра'
+        verbose_name_plural = 'Категории жанров'
+
+    def __str__(self):
+        return self.name
+
+
+class Title(models.Model):
+    """Произведения, к которым пишут отзывы
+    (определённый фильм, книга или песенка)."""
+    name = models.CharField(
+        max_length=256,
+        verbose_name='Название',
+        help_text='Указать название произведения'
+    )
+    year = models.IntegerField(
+        validators=get_max_year_for_title,
+        verbose_name='Год выпуска',
+        null=True
+    )
+    description = models.TextField(
+        verbose_name='Описание',
+        blank=True,
+        null=True
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Slug жанра',
+        related_name='titles'
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Slug категории',
+        related_name='titles'
+    )
+
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
+    def __str__(self):
+        return self.name
