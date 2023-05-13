@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
 
 
@@ -10,6 +11,7 @@ ROLE_CHOICES = [
 
 
 class User(AbstractUser):
+    email = models.EmailField('Email', unique=True)
     bio = models.TextField('Биография', blank=True)
     role = models.CharField('Роль', max_length=16,
                             choices=ROLE_CHOICES, default="user")
