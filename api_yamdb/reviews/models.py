@@ -1,5 +1,6 @@
 from django.db import models
 from .validators import get_max_year_for_title, slug_validator
+from users.models import User
 
 
 class Category(models.Model):
@@ -12,7 +13,7 @@ class Category(models.Model):
     slug = models.SlugField(
         unique=True,
         max_length=50,
-        validators=slug_validator,
+        validators=[slug_validator],
         verbose_name='Slug категории'
     )
 
@@ -58,7 +59,7 @@ class Genre(models.Model):
     slug = models.SlugField(
         unique=True,
         max_length=50,
-        validators=slug_validator,
+        validators=[slug_validator],
         verbose_name='Slug жанра'
     )
 
@@ -80,7 +81,7 @@ class Title(models.Model):
         help_text='Указать название произведения'
     )
     year = models.IntegerField(
-        validators=get_max_year_for_title,
+        validators=[get_max_year_for_title],
         verbose_name='Год выпуска',
         null=True
     )
@@ -91,7 +92,6 @@ class Title(models.Model):
     )
     genre = models.ManyToManyField(
         Genre,
-        on_delete=models.SET_NULL,
         null=True,
         verbose_name='Slug жанра',
         related_name='titles'
