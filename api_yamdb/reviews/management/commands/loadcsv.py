@@ -9,8 +9,8 @@ users_csv = path_csv / 'users.csv'
 category_csv = path_csv / 'category.csv'
 genre_csv = path_csv / 'genre.csv'
 titles_csv = path_csv / 'titles.csv'
-comments_csv = path_csv / 'comments.csv'
 review_csv = path_csv / 'review.csv'
+comments_csv = path_csv / 'comments.csv'
 
 
 class Command(BaseCommand):
