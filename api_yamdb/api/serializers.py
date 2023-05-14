@@ -34,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         
 class TitleSerializer(serializers.ModelSerializer):
-    rating = serializers.FloatField(read_only=True)
+    rating = serializers.SerializerMethodField()
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
