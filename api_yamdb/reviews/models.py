@@ -27,26 +27,27 @@ class Category(models.Model):
 
 
 class Comment(models.Model):
-    """Комментарии к отзывам"""
-    review = models.ForeignKey(
-        Rewiew,
-        on_delete=models.CASCADE,
-        related_name='comments'
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments'
-    )
-    text = models.TextField()
-    pub_date = models.DateTimeField(
-        'Дата добавления',
-        auto_now_add=True,
-        db_index=True
-    )
+    # """Комментарии к отзывам"""
+    # review = models.ForeignKey(
+    #     Rewiew,
+    #     on_delete=models.CASCADE,
+    #     related_name='comments'
+    # )
+    # author = models.ForeignKey(
+    #     User,
+    #     on_delete=models.CASCADE,
+    #     related_name='comments'
+    # )
+    # text = models.TextField()
+    # pub_date = models.DateTimeField(
+    #     'Дата добавления',
+    #     auto_now_add=True,
+    #     db_index=True
+    # )
 
-    def __str__(self):
-        return self.text
+    # def __str__(self):
+    #     return self.text
+    pass
 
 
 class Genre(models.Model):
