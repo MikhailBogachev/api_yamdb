@@ -1,3 +1,4 @@
+import re
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Title
@@ -36,9 +37,18 @@ class GenreSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
 
-        
+
+class UserMeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
+        read_only_fields = ['role']
+
+
 class TitleSerializer(serializers.ModelSerializer):
     rating = serializers.FloatField(read_only=True)
     genre = GenreSerializer(many=True, read_only=True)
@@ -51,8 +61,8 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class UserRegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=256)
-    email = serializers.EmailField()
+    username = serializers.CharField(max_length=150)
+    email = serializers.EmailField(max_length=254)
 
     def validate(self, data):
         username = data.get('username')
@@ -60,18 +70,24 @@ class UserRegisterSerializer(serializers.Serializer):
         obj1 = User.objects.filter(email=email).first()
         obj2 = User.objects.filter(username=username).first()
         if obj1 and obj1.username != username:
-            raise serializers.ValidationError('Email уже зарегестрирован другим пользователем')
+            raise serializers.ValidationError(
+                'Email уже зарегестрирован другим пользователем'
+            )
         if obj2 and obj2.email != email:
             raise serializers.ValidationError('Username занят')
         return data
-    
+
     def validate_username(self, value):
+        if not re.match(r'^[\w.@+-]+\Z', value):
+            raise serializers.ValidationError(
+                'Enter a valid username. This value may contain only letters, '
+                'numbers, and @/./+/-/_ characters.'
+            )
         if value == 'me':
             raise serializers.ValidationError('Username не должет быть me')
         return value
 
-        
 
 class UserTokenSrializer(serializers.Serializer):
-    username = serializers.CharField(max_length=256)
-    confirmation_code = serializers.CharField(max_length=256)
+    username = serializers.CharField(max_length=150)
+    confirmation_code = serializers.CharField(max_length=254)
