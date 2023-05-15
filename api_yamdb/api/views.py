@@ -33,6 +33,7 @@ class CategoryViewSet(GetPostDeleteViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('name', 'slug')
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -58,6 +59,7 @@ class GenreViewSet(GetPostDeleteViewSet):
     filter_backends = (DjangoFilterBackend,  filters.SearchFilter)
     filterset_fields = ('name', 'slug')
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
