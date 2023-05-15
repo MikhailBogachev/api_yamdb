@@ -1,18 +1,24 @@
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, permissions, status, filters
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from rest_framework import viewsets, permissions, status, filters, mixins
 from rest_framework.views import APIView
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 from reviews.models import Category, Genre, Title#, Review
 from .permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly, IsAdmin
 from .mixins import GetPostDeleteViewSet
 from .filters import TitleFilter
 from .serializers import (CategorySerializer, CommentSerializer, GenreSerializer,
-                          TitleSerializer, UserSerializer)
+                          TitleSerializer, UserSerializer, UserRegisterSerializer,
+                          UserTokenSrializer)
 
 
 User = get_user_model()
@@ -93,6 +99,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class APIUserMe(APIView):
+    permission_classes = [permissions.IsAuthenticated,]
+
     def get(self, request):
         user = User.objects.get(username=request.user)
         serializer = UserSerializer(user)
@@ -105,3 +113,46 @@ class APIUserMe(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class APIUserRegister(APIView):
+    permission_classes = [permissions.AllowAny,]
+
+    def post(self, request):
+        serializer = UserRegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = serializer.validated_data.get('username')
+        email = serializer.validated_data.get('email')
+        user, _ = User.objects.get_or_create(**serializer.validated_data)
+        # user = User.objects.filter(username=username, email=email).first()
+        # if not user:
+        #     return Response({"message": "Пользователя с такими username и email не существует"}, status=status.HTTP_400_BAD_REQUEST)
+        confirmation_code = default_token_generator.make_token(user)
+        user.confirmation_code = confirmation_code
+        user.save()
+
+        # send_mail(
+        #     "Subject here",
+        #     f"Your confirmation code: {confirmation_code}",
+        #     "from@example.com",
+        #     [email],
+        #     fail_silently=False,
+        # )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class APIUserToken(TokenObtainPairView):
+    permission_classes = [permissions.AllowAny]
+    serializer_class = UserTokenSrializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        confirmation_code = serializer.validated_data.get('confirmation_code')
+        username = serializer.validated_data.get('username')
+        user = get_object_or_404(User, username=username)
+        if user.confirmation_code != confirmation_code:
+            raise Response({'message': 'Invalid confirmation_code'}, status=status.HTTP_400_BAD_REQUEST)
+        refresh = RefreshToken.for_user(user)
+        return Response({'token': str(refresh.access_token)})

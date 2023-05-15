@@ -3,6 +3,9 @@ from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Title
 
 
+User = get_user_model()
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -32,7 +35,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = get_user_model()
+        model = User
         fields = ('username', 'email', 'first_name', 'last_name', 'bio', 'role')
 
         
@@ -45,3 +48,30 @@ class TitleSerializer(serializers.ModelSerializer):
         model = Title
         fields = ('id', 'name', 'year', 'rating',
                   'description', 'genre', 'category')
+
+
+class UserRegisterSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=256)
+    email = serializers.EmailField()
+
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+        obj1 = User.objects.filter(email=email).first()
+        obj2 = User.objects.filter(username=username).first()
+        if obj1 and obj1.username != username:
+            raise serializers.ValidationError('Email уже зарегестрирован другим пользователем')
+        if obj2 and obj2.email != email:
+            raise serializers.ValidationError('Username занят')
+        return data
+    
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError('Username не должет быть me')
+        return value
+
+        
+
+class UserTokenSrializer(serializers.Serializer):
+    username = serializers.CharField(max_length=256)
+    confirmation_code = serializers.CharField(max_length=256)
