@@ -51,6 +51,12 @@ class TitleSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
 
+    def get_rating(self, obj):
+        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
+        if not rating:
+            return None
+        return round(rating, 1)
+    
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
@@ -88,12 +94,6 @@ class UserRegisterSerializer(serializers.Serializer):
 class UserTokenSrializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     confirmation_code = serializers.CharField(max_length=254)
-    
-    def get_rating(self, obj):
-        rating = obj.reviews.aggregate(Avg('score')).get('score__avg')
-        if not rating:
-            return None
-        return round(rating, 1)
 
 
 class ReviewSerializer(serializers.ModelSerializer):
