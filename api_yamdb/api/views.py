@@ -11,14 +11,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import (LimitOffsetPagination,
                                        PageNumberPagination)
 
-from reviews.models import Category, Genre, Title#, Review
+from reviews.models import Category, Genre, Title, Review
 from .permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly, IsAdmin
 from .mixins import GetPostDeleteViewSet
 from .filters import TitleFilter
 from .serializers import (
     CategorySerializer, CommentSerializer, GenreSerializer, TitleSerializer,
-    UserSerializer, UserRegisterSerializer, UserTokenSrializer,
-    UserMeSerializer
+    ReviewSerializer, UserSerializer, UserRegisterSerializer, 
+    UserTokenSrializer, UserMeSerializer
 )
 
 
@@ -37,9 +37,7 @@ class CategoryViewSet(GetPostDeleteViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_classes = [
-        AdminOrAuthorOrReadOnly
-    ]
+    permission_classes = [AdminOrAuthorOrReadOnly]
     pagination_class = LimitOffsetPagination
 
     def get_review(self):
@@ -70,6 +68,21 @@ class TitleViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend,  filters.SearchFilter)
     filterset_class = TitleFilter
     search_fields = ('name',)
+
+      
+class ReviewViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewSerializer
+    permission_classes = [AdminOrAuthorOrReadOnly]
+    pagination_class = LimitOffsetPagination
+    
+    def get_title(self):
+        return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+
+    def get_queryset(self):
+        return self.get_title().reviews.all()
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class UserViewSet(viewsets.ModelViewSet):
