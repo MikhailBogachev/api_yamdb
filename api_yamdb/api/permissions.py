@@ -41,3 +41,17 @@ class AdminOrAuthorOrReadOnly(permissions.BasePermission):
                      or request.user.is_superuser)
                 )
         )
+
+
+class IsAdmin(permissions.BasePermission):
+    """
+    Определяет права доступа:
+    Только для пользователей, чья role = admin
+    и суперюзеры
+    """
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and (request.user.role == 'admin'
+                 or request.user.is_superuser)
+        )
