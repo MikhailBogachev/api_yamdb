@@ -8,8 +8,7 @@ from rest_framework import viewsets, permissions, status, filters
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.pagination import (LimitOffsetPagination,
-                                       PageNumberPagination)
+from rest_framework.pagination import LimitOffsetPagination
 
 from reviews.models import Category, Genre, Title, Review
 from .permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly, IsAdmin
@@ -18,7 +17,7 @@ from .filters import TitleFilter
 from .serializers import (
     CategorySerializer, CommentSerializer, GenreSerializer,
     TitleReciveSerializer, TitleCreateSetrializer,
-    ReviewSerializer, UserSerializer, UserRegisterSerializer, 
+    ReviewSerializer, UserSerializer, UserRegisterSerializer,
     UserTokenSrializer, UserMeSerializer
 )
 
@@ -77,14 +76,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     filterset_class = TitleFilter
     search_fields = ('name',)
 
-   
 
-      
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = [AdminOrAuthorOrReadOnly]
     pagination_class = LimitOffsetPagination
-    
+
     def get_title(self):
         return get_object_or_404(Title, pk=self.kwargs.get('title_id'))
 
@@ -99,7 +96,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdmin]
-    pagination_class = PageNumberPagination
+    pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     # Исключаем метод PUT
@@ -129,7 +126,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 class APIUserMe(APIView):
-    permission_classes = [permissions.IsAuthenticated,]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         user = User.objects.get(username=request.user)
@@ -146,7 +143,7 @@ class APIUserMe(APIView):
 
 
 class APIUserRegister(APIView):
-    permission_classes = [permissions.AllowAny,]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
