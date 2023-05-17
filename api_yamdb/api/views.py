@@ -16,7 +16,8 @@ from .permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly, IsAdmin
 from .mixins import GetPostDeleteViewSet
 from .filters import TitleFilter
 from .serializers import (
-    CategorySerializer, CommentSerializer, GenreSerializer, TitleReciveSerializer, TitleCreateSetrializer,
+    CategorySerializer, CommentSerializer, GenreSerializer,
+    TitleReciveSerializer, TitleCreateSetrializer,
     ReviewSerializer, UserSerializer, UserRegisterSerializer, 
     UserTokenSrializer, UserMeSerializer
 )
@@ -63,18 +64,20 @@ class GenreViewSet(GetPostDeleteViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitleReciveSerializer
+        return TitleCreateSetrializer
+
     queryset = Title.objects.all()
-    serializer_class = TitleReciveSerializer
+    serializer_class = get_serializer_class
     permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend,  filters.SearchFilter)
     filterset_class = TitleFilter
     search_fields = ('name',)
 
-    def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return TitleReciveSerializer
-        return TitleCreateSetrializer
+   
 
       
 class ReviewViewSet(viewsets.ModelViewSet):
