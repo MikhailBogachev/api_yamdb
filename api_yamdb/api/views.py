@@ -56,7 +56,7 @@ class GenreViewSet(GetPostDeleteViewSet):
     serializer_class = GenreSerializer
     permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend,  filters.SearchFilter)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('name', 'slug')
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -72,7 +72,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = get_serializer_class
     permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend,  filters.SearchFilter)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_class = TitleFilter
     search_fields = ('name',)
 

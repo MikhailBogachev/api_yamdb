@@ -8,15 +8,15 @@ def get_current_year():
 
 
 get_max_year_for_title = MaxValueValidator(
-        limit_value=get_current_year,
-        message='Произведение еще не вышло!'
-    )
+    limit_value=get_current_year,
+    message='Произведение еще не вышло!'
+)
 
 
 slug_validator = RegexValidator(
-        regex='^[-a-zA-Z0-9_]+$',
-        message=(
-            R'Возможны только символы латинского алфавита,'
-            R'цифры и подчеркивание'
-        )
+    regex='^[-a-zA-Z0-9_]+$',
+    message=(
+        R'Возможны только символы латинского алфавита,'
+        R'цифры и подчеркивание'
     )
+)
