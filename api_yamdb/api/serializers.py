@@ -56,7 +56,7 @@ class TitleReciveSerializer(serializers.ModelSerializer):
         if not rating:
             return None
         return round(rating, 1)
-    
+
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
@@ -119,7 +119,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         read_only=True,
         slug_field='username'
     )
-    
+
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
         model = Review
