@@ -46,7 +46,7 @@ class UserMeSerializer(serializers.ModelSerializer):
         read_only_fields = ['role']
 
 
-class TitleSerializer(serializers.ModelSerializer):
+class TitleReciveSerializer(serializers.ModelSerializer):
     rating = serializers.SerializerMethodField()
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
@@ -60,6 +60,24 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = ('id', 'name', 'year', 'rating',
+                  'description', 'genre', 'category')
+
+
+class TitleCreateSetrializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=200)
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
+
+    class Meta:
+        model = Title
+        fields = ('id', 'name', 'year',
                   'description', 'genre', 'category')
 
 
