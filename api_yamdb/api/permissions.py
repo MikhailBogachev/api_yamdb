@@ -1,4 +1,8 @@
+from django.contrib.auth import get_user_model
 from rest_framework import permissions
+
+
+User = get_user_model()
 
 
 class AdminOrReadOnly(permissions.BasePermission):
@@ -12,7 +16,7 @@ class AdminOrReadOnly(permissions.BasePermission):
         return (
             request.method in permissions.SAFE_METHODS
             or (request.user.is_authenticated
-                and (request.user.role == 'admin'
+                and (request.user.is_admin
                      or request.user.is_superuser)
                 )
         )
@@ -37,7 +41,8 @@ class AdminOrAuthorOrReadOnly(permissions.BasePermission):
             request.method in permissions.SAFE_METHODS
             or (request.user.is_authenticated
                 and (obj.author == request.user
-                     or request.user.role in ['admin', 'moderator']
+                     or request.user.is_admin
+                     or request.user.is_moderator
                      or request.user.is_superuser)
                 )
         )
@@ -49,9 +54,10 @@ class IsAdmin(permissions.BasePermission):
     Только для пользователей, чья role = admin
     и суперюзеры
     """
+
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
-            and (request.user.role == 'admin'
+            and (request.user.is_admin
                  or request.user.is_superuser)
         )

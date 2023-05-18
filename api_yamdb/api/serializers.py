@@ -1,7 +1,9 @@
 import re
+
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from rest_framework import serializers
+
 from reviews.models import Category, Comment, Genre, Title, Review
 
 
@@ -39,10 +41,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserMeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username', 'email', 'first_name',
-                  'last_name', 'bio', 'role')
+    class Meta(UserSerializer.Meta):
         read_only_fields = ['role']
 
 
@@ -88,13 +87,13 @@ class UserRegisterSerializer(serializers.Serializer):
     def validate(self, data):
         username = data.get('username')
         email = data.get('email')
-        obj1 = User.objects.filter(email=email).first()
-        obj2 = User.objects.filter(username=username).first()
-        if obj1 and obj1.username != username:
+        user_from_email = User.objects.filter(email=email).first()
+        user_from_username = User.objects.filter(username=username).first()
+        if user_from_email and user_from_email.username != username:
             raise serializers.ValidationError(
                 'Email уже зарегестрирован другим пользователем'
             )
-        if obj2 and obj2.email != email:
+        if user_from_username and user_from_username.email != email:
             raise serializers.ValidationError('Username занят')
         return data
 
@@ -104,7 +103,7 @@ class UserRegisterSerializer(serializers.Serializer):
                 'Enter a valid username. This value may contain only letters, '
                 'numbers, and @/./+/-/_ characters.'
             )
-        if value == 'me':
+        if value.lower() == 'me':
             raise serializers.ValidationError('Username не должет быть me')
         return value
 
