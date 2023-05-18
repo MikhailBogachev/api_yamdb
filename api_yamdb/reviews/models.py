@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
+
 from .validators import get_max_year_for_title, slug_validator
 from users.models import User
 
