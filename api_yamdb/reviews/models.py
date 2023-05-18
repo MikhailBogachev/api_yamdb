@@ -107,8 +107,8 @@ class Review(models.Model):
     )
     score = models.IntegerField(
         validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10)
+            MinValueValidator(1, 'Оценка должна быть не меньше 1!'),
+            MaxValueValidator(10, 'Оценка должна быть не больше 10!')
         ],
         verbose_name='Оценка'
     )
@@ -127,6 +127,7 @@ class Review(models.Model):
         ]
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
+        ordering = ['-pub_date']
 
     def __str__(self):
         return self.text
