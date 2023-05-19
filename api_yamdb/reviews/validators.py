@@ -1,16 +1,13 @@
-from datetime import datetime
-
-from django.core.validators import RegexValidator, MaxValueValidator
-
-
-def get_current_year():
-    return datetime.now().year
+from django.utils import timezone
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 
 
-get_max_year_for_title = MaxValueValidator(
-    limit_value=get_current_year,
-    message='Произведение еще не вышло!'
-)
+def year_validator_for_title(value):
+    if value > timezone.now().year:
+        raise ValidationError(
+            'Проверьте год. Произведение еще не вышло!'
+        )
 
 
 slug_validator = RegexValidator(

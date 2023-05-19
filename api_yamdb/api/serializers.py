@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
 from reviews.models import Category, Comment, Genre, Title, Review
-
+from reviews.validators import year_validator_for_title
 
 User = get_user_model()
 
@@ -66,6 +66,9 @@ class TitleCreateSetrializer(serializers.ModelSerializer):
         slug_field='slug',
         many=True
     )
+
+    def year_validate(self, data):
+        return year_validator_for_title
 
     class Meta:
         model = Title

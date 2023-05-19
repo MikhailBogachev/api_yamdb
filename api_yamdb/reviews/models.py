@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from .validators import get_max_year_for_title, slug_validator
+from .validators import year_validator_for_title, slug_validator
 from users.models import User
 
 
@@ -60,7 +60,7 @@ class Title(models.Model):
         help_text='Указать название произведения'
     )
     year = models.IntegerField(
-        validators=[get_max_year_for_title],
+        validators=[year_validator_for_title],
         verbose_name='Год выпуска',
         null=True
     )
