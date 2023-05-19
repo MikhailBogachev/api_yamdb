@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.decorators import action
+from django.db.models import Avg
 
 from reviews.models import Category, Genre, Title, Review
 from .permissions import AdminOrAuthorOrReadOnly, AdminOrReadOnly, IsAdmin
@@ -28,12 +30,11 @@ User = get_user_model()
 class CategoryViewSet(GetPostDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [AdminOrReadOnly]
-    pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields = ('name', 'slug')
-    search_fields = ('name',)
-    lookup_field = 'slug'
+
+
+class GenreViewSet(GetPostDeleteViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -51,30 +52,20 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=self.get_review())
 
 
-class GenreViewSet(GetPostDeleteViewSet):
-    queryset = Genre.objects.all()
-    serializer_class = GenreSerializer
-    permission_classes = [AdminOrReadOnly]
-    pagination_class = LimitOffsetPagination
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    filterset_fields = ('name', 'slug')
-    search_fields = ('name',)
-    lookup_field = 'slug'
-
-
 class TitleViewSet(viewsets.ModelViewSet):
-    def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return TitleReciveSerializer
-        return TitleCreateSetrializer
-
-    queryset = Title.objects.all()
-    serializer_class = get_serializer_class
     permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_class = TitleFilter
     search_fields = ('name',)
+
+    def get_queryset(self):
+        return Title.objects.annotate(rating=Avg('reviews__score'))
+
+    def get_serializer_class(self):
+        if self.action in ['list', 'retrieve']:
+            return TitleReciveSerializer
+        return TitleCreateSetrializer
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -95,51 +86,27 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAdmin]
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    lookup_field = ('username')
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     # Исключаем метод PUT
     http_method_names = ["get", "post", "patch", "delete"]
 
-    def retrieve(self, request, *args, **kwargs):
-        username = kwargs.get('pk', None)
-        user = get_object_or_404(User, username=username)
-        serializer = self.get_serializer(user)
-        return Response(serializer.data)
+    @action(detail=False, methods=['get', 'patch'],
+            permission_classes=[permissions.IsAuthenticated])
+    def me(self, request):
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        username = kwargs.get('pk', None)
-        user = get_object_or_404(User, username=username)
-        serializer = self.get_serializer(user, data=request.data,
-                                         partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
-
-    def destroy(self, request, *args, **kwargs):
-        username = kwargs.get('pk', None)
-        user = get_object_or_404(User, username=username)
-        self.perform_destroy(user)
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class APIUserMe(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        user = User.objects.get(username=request.user)
-        serializer = UserMeSerializer(user)
-        return Response(serializer.data)
-
-    def patch(self, request):
-        user = get_object_or_404(User, username=request.user)
-        serializer = UserMeSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
+        if request.method == 'GET':
+            serializer = UserMeSerializer(request.user)
+            return Response(serializer.data)
+        if request.method == 'PATCH':
+            serializer = UserMeSerializer(request.user,
+                                          data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class APIUserRegister(APIView):
@@ -175,7 +142,6 @@ class APIUserToken(APIView):
         confirmation_code = serializer.validated_data.get('confirmation_code')
         username = serializer.validated_data.get('username')
         user = get_object_or_404(User, username=username)
-        print(user.confirmation_code)
         if user.confirmation_code != confirmation_code:
             return Response({'message': 'Invalid confirmation_code'},
                             status=status.HTTP_400_BAD_REQUEST)
