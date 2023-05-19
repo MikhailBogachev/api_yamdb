@@ -53,14 +53,12 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.annotate(rating=Avg('reviews__score'))
     permission_classes = [AdminOrReadOnly]
     pagination_class = LimitOffsetPagination
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_class = TitleFilter
     search_fields = ('name',)
-
-    def get_queryset(self):
-        return Title.objects.annotate(rating=Avg('reviews__score'))
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
@@ -101,12 +99,12 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == 'GET':
             serializer = UserMeSerializer(request.user)
             return Response(serializer.data)
-        if request.method == 'PATCH':
-            serializer = UserMeSerializer(request.user,
-                                          data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
+        
+        serializer = UserMeSerializer(request.user,
+                                        data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
 
 class APIUserRegister(APIView):
