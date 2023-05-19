@@ -68,7 +68,7 @@ class TitleCreateSetrializer(serializers.ModelSerializer):
     )
 
     def year_validate(self, data):
-        return year_validator_for_title()
+        return year_validator_for_title(data)
 
     class Meta:
         model = Title
