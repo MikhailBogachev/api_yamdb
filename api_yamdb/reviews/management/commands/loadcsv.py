@@ -1,6 +1,8 @@
 from csv import DictReader
+
 from django.core.management import BaseCommand
 from django.conf import settings
+
 from reviews.models import Category, Genre, Title, Comment, Review
 from users.models import User
 
